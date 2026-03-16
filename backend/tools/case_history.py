@@ -5,7 +5,7 @@ Firestore-backed institutional memory of fault resolutions.
 
 from datetime import datetime, timezone
 
-from google.adk.tools import tool
+
 from google.cloud import firestore
 
 from core.config import settings
@@ -19,7 +19,6 @@ def _get_db():
     return firestore.Client()
 
 
-@tool
 def lookup_similar_cases(
     fault_description: str,
     equipment_model: str,
@@ -107,7 +106,6 @@ def lookup_similar_cases(
         return {"found": False, "cases": [], "message": "Case history unavailable."}
 
 
-@tool
 def save_resolved_case(
     equipment_model: str,
     industry: str,

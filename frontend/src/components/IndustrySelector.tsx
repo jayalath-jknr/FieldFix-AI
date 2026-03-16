@@ -57,7 +57,7 @@ export function IndustrySelector({ onSelect }: Props) {
           className="text-center mb-10"
         >
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-md">
               <Wrench className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gradient">FieldFix AI</h1>
@@ -83,7 +83,7 @@ export function IndustrySelector({ onSelect }: Props) {
                   whileHover={{ scale: 1.03, y: -4 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setSelectedIndustry(industry)}
-                  className="glass rounded-2xl p-5 text-center group cursor-pointer border border-white/5 hover:border-primary/30 transition-colors"
+                  className="glass rounded-2xl p-5 text-center group cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl hover:border-primary/20"
                 >
                   <div
                     className={`w-14 h-14 rounded-xl bg-gradient-to-br ${industryGradients[industry.id]} flex items-center justify-center mx-auto mb-3 group-hover:shadow-lg transition-shadow`}
@@ -132,7 +132,7 @@ export function IndustrySelector({ onSelect }: Props) {
                   whileHover={{ x: 4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => onSelect(selectedIndustry.id, model)}
-                  className="w-full glass rounded-xl p-4 flex items-center justify-between group cursor-pointer border border-white/5 hover:border-primary/30 transition-all"
+                  className="w-full glass rounded-xl p-4 flex items-center justify-between group cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-primary/20"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-surface-lighter flex items-center justify-center">

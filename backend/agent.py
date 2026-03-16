@@ -3,8 +3,8 @@ ADK LiveAgent definition.
 One agent instance per WebSocket session (per technician on-site job).
 """
 
-from google.adk.agents import LiveAgent
-from google.adk.runners import LiveRunner
+from google.adk.agents import Agent as LiveAgent
+from google.adk.runners import Runner as LiveRunner
 from google.genai.types import LiveConnectConfig, SpeechConfig, VoiceConfig
 
 from core.config import settings

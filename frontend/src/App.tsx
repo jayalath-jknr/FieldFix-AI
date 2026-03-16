@@ -118,9 +118,9 @@ function App() {
       {/* Left: Camera + Diagnosis */}
       <div className="flex-1 flex flex-col min-h-0">
         {/* Top Bar */}
-        <div className="flex items-center justify-between px-4 py-3 glass border-b border-white/5">
+        <div className="flex items-center justify-between px-4 py-3 glass border-b border-black/5 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
               <Zap className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -153,7 +153,7 @@ function App() {
       </div>
 
       {/* Right: Citations + Steps */}
-      <div className="w-full lg:w-96 flex flex-col glass border-t lg:border-t-0 lg:border-l border-white/5 max-h-[40vh] lg:max-h-full overflow-y-auto">
+      <div className="w-full lg:w-96 flex flex-col glass border-t lg:border-t-0 lg:border-l border-black/5 max-h-[40vh] lg:max-h-full overflow-y-auto z-10">
         <div className="p-4 space-y-4">
           {/* Repair Steps */}
           <StepTracker steps={repairSteps} />

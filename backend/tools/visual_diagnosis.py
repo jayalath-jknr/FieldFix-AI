@@ -8,7 +8,7 @@ import base64
 import json
 import re
 
-from google.adk.tools import tool
+
 from google import genai
 
 from core.config import settings
@@ -64,7 +64,6 @@ FALLBACK_RESULT = {
 }
 
 
-@tool
 def diagnose_frame(
     image_base64: str,
     description: str,

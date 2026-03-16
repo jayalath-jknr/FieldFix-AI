@@ -9,3 +9,4 @@ __pycache__/
 *.pyc
 *.pyo
 *.log
+fieldfix_ai_agent_prompt.md

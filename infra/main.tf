@@ -6,10 +6,6 @@ terraform {
       version = "~> 5.0"
     }
   }
-  backend "gcs" {
-    bucket = "fieldfix-tf-state"
-    prefix = "terraform/state"
-  }
 }
 
 provider "google" {

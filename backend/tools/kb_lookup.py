@@ -11,7 +11,7 @@ import json
 
 import numpy as np
 from functools import lru_cache
-from google.adk.tools import tool
+
 from google.cloud import storage
 from google import genai
 
@@ -60,7 +60,6 @@ def _cosine_similarity(a: list[float], b: list[float]) -> float:
     return float(np.dot(a_arr, b_arr) / norm)
 
 
-@tool
 def search_manual(
     query: str,
     industry: str,
