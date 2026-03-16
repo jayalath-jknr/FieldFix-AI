@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  # ── Backend ───────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8080"
+    environment:
+      - GCP_PROJECT_ID=fieldfix-local
+      - GCP_REGION=us-central1
+      - GCS_BUCKET_NAME=fieldfix-knowledge-base
+      - FIRESTORE_COLLECTION=fault_cases
+      - ENVIRONMENT=local
+      - LOG_LEVEL=DEBUG
+      - CORS_ORIGINS=["http://localhost:5173"]
+      - FIRESTORE_EMULATOR_HOST=firestore:8080
+      - STORAGE_EMULATOR_HOST=http://gcs:4443
+    depends_on:
+      - firestore
+      - gcs
+    volumes:
+      - ./backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+
+  # ── Firestore Emulator ────────────────────────────────────────
+  firestore:
+    image: google/cloud-sdk:latest
+    command: >
+      gcloud emulators firestore start
+      --host-port=0.0.0.0:8080
+      --project=fieldfix-local
+    ports:
+      - "8081:8080"
+
+  # ── Fake GCS Server ───────────────────────────────────────────
+  gcs:
+    image: fsouza/fake-gcs-server:latest
+    command:
+      - "-scheme"
+      - "http"
+      - "-port"
+      - "4443"
+      - "-external-url"
+      - "http://gcs:4443"
+    ports:
+      - "4443:4443"
+    volumes:
+      - gcs-data:/storage
+
+  # ── Frontend (dev mode) ──────────────────────────────────────
+  frontend:
+    image: node:20-slim
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+    environment:
+      - VITE_WS_URL=ws://localhost:8000
+
+volumes:
+  gcs-data:
+  frontend-node-modules:

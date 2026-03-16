@@ -1,0 +1,115 @@
+﻿Collecting fastapi==0.115.0 (from -r requirements.txt (line 1))
+  Using cached fastapi-0.115.0-py3-none-any.whl.metadata (27 kB)
+Collecting uvicorn==0.32.0 (from uvicorn[standard]==0.32.0->-r requirements.txt (line 2))
+  Using cached uvicorn-0.32.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting websockets==13.1 (from -r requirements.txt (line 3))
+  Using cached websockets-13.1-cp311-cp311-win_amd64.whl.metadata (7.0 kB)
+Collecting google-genai>=1.14.0 (from -r requirements.txt (line 4))
+  Using cached google_genai-1.67.0-py3-none-any.whl.metadata (52 kB)
+Collecting google-adk==1.0.0 (from -r requirements.txt (line 5))
+  Using cached google_adk-1.0.0-py3-none-any.whl.metadata (9.8 kB)
+Collecting google-cloud-firestore==2.19.0 (from -r requirements.txt (line 6))
+  Using cached google_cloud_firestore-2.19.0-py2.py3-none-any.whl.metadata (5.7 kB)
+Collecting google-cloud-storage==2.18.2 (from -r requirements.txt (line 7))
+  Using cached google_cloud_storage-2.18.2-py2.py3-none-any.whl.metadata (9.1 kB)
+Collecting pydantic==2.9.2 (from -r requirements.txt (line 8))
+  Using cached pydantic-2.9.2-py3-none-any.whl.metadata (149 kB)
+Collecting pydantic-settings==2.6.1 (from -r requirements.txt (line 9))
+  Using cached pydantic_settings-2.6.1-py3-none-any.whl.metadata (3.5 kB)
+Collecting PyMuPDF==1.24.13 (from -r requirements.txt (line 10))
+  Using cached PyMuPDF-1.24.13-cp39-abi3-win_amd64.whl.metadata (3.4 kB)
+Collecting numpy==2.1.3 (from -r requirements.txt (line 11))
+  Using cached numpy-2.1.3-cp311-cp311-win_amd64.whl.metadata (60 kB)
+Collecting structlog==24.4.0 (from -r requirements.txt (line 12))
+  Using cached structlog-24.4.0-py3-none-any.whl.metadata (7.3 kB)
+Collecting starlette<0.39.0,>=0.37.2 (from fastapi==0.115.0->-r requirements.txt (line 1))
+  Using cached starlette-0.38.6-py3-none-any.whl.metadata (6.0 kB)
+Collecting typing-extensions>=4.8.0 (from fastapi==0.115.0->-r requirements.txt (line 1))
+  Using cached typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting click>=7.0 (from uvicorn==0.32.0->uvicorn[standard]==0.32.0->-r requirements.txt (line 2))
+  Using cached click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+Collecting h11>=0.8 (from uvicorn==0.32.0->uvicorn[standard]==0.32.0->-r requirements.txt (line 2))
+  Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting authlib>=1.5.1 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached authlib-1.6.9-py2.py3-none-any.whl.metadata (9.8 kB)
+Collecting google-api-python-client>=2.157.0 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached google_api_python_client-2.192.0-py3-none-any.whl.metadata (7.0 kB)
+Collecting google-cloud-aiplatform>=1.87.0 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached google_cloud_aiplatform-1.141.0-py2.py3-none-any.whl.metadata (46 kB)
+Collecting google-cloud-secret-manager>=2.22.0 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached google_cloud_secret_manager-2.26.0-py3-none-any.whl.metadata (9.8 kB)
+Collecting google-cloud-speech>=2.30.0 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached google_cloud_speech-2.37.0-py3-none-any.whl.metadata (9.8 kB)
+Collecting graphviz>=0.20.2 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached graphviz-0.21-py3-none-any.whl.metadata (12 kB)
+Collecting mcp>=1.5.0 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached mcp-1.26.0-py3-none-any.whl.metadata (89 kB)
+Collecting opentelemetry-api>=1.31.0 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached opentelemetry_api-1.40.0-py3-none-any.whl.metadata (1.5 kB)
+Collecting opentelemetry-exporter-gcp-trace>=1.9.0 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached opentelemetry_exporter_gcp_trace-1.11.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting opentelemetry-sdk>=1.31.0 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached opentelemetry_sdk-1.40.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting python-dotenv>=1.0.0 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached python_dotenv-1.2.2-py3-none-any.whl.metadata (27 kB)
+Collecting PyYAML>=6.0.2 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached pyyaml-6.0.3-cp311-cp311-win_amd64.whl.metadata (2.4 kB)
+Collecting sqlalchemy>=2.0 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached sqlalchemy-2.0.48-cp311-cp311-win_amd64.whl.metadata (9.8 kB)
+Collecting tzlocal>=5.3 (from google-adk==1.0.0->-r requirements.txt (line 5))
+  Using cached tzlocal-5.3.1-py3-none-any.whl.metadata (7.6 kB)
+INFO: pip is looking at multiple versions of google-adk to determine which version is compatible with other requirements. This could take a while.
+.\venv\Scripts\python.e
+xe : ERROR: Cannot 
+install -r 
+requirements.txt (line 
+5) and uvicorn==0.32.0 
+because these package 
+versions have 
+conflicting 
+dependencies.
+At line:1 char:1
++ .\venv\Scripts\python
+.exe -m pip install -r 
+requirements.txt > 
+instal ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (ERROR: Cannot   
+  i...g dependencie    
+s.:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+
+The conflict is caused by:
+    The user requested uvicorn==0.32.0
+    google-adk 1.0.0 depends on uvicorn>=0.34.0
+
+To fix this you could try to:
+1. loosen the range of package versions you've specified
+2. remove package versions to allow pip attempt to solve the dependency conflict
+
+ERROR: 
+ResolutionImpossible: 
+for help visit https://
+pip.pypa.io/en/latest/t
+opics/dependency-resolu
+tion/#dealing-with-depe
+ndency-conflicts
+
+[notice] A new release 
+of pip is available: 
+24.0 -> 26.0.1
+[notice] To update, 
+run: D:\Users\Nirasha\D
+ocuments\GitHub\FieldFi
+x AI\backend\venv\Scrip
+ts\python.exe -m pip 
+install --upgrade pip
