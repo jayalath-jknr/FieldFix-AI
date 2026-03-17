@@ -37,6 +37,7 @@ function App() {
     setSessionId,
     setIndustry,
     setEquipmentModel,
+    setAgentState,
     setError,
     resetSession,
   } = useSessionStore();
@@ -79,8 +80,10 @@ function App() {
         }
         startCapture();
 
-        // Start microphone
+        // Start microphone — mark as listening immediately so the indicator
+        // reflects mic state rather than waiting for backend session_ready
         await startRecording();
+        setAgentState("listening");
 
         // Connect WebSocket
         connect(sid, selectedIndustry, selectedModel);
@@ -93,6 +96,7 @@ function App() {
       setSessionId,
       setIndustry,
       setEquipmentModel,
+      setAgentState,
       setError,
       startCamera,
       startCapture,

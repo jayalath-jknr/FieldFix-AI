@@ -21,11 +21,11 @@ interface Props {
 }
 
 const industries: IndustryConfig[] = [
-  { id: "solar", label: "Solar", equipment: ["SMA-Sunny5000", "Fronius-Symo", "Huawei-SUN2000"] },
-  { id: "telecom", label: "Telecom", equipment: ["Cisco-ASR9000", "Nokia-FSED", "Ericsson-RBS"] },
-  { id: "hvac", label: "HVAC", equipment: ["Carrier-30XA", "Daikin-VRV", "Trane-CGAM"] },
-  { id: "lab", label: "Lab Equipment", equipment: ["Agilent-HPLC", "Thermo-Centrifuge", "Beckman-UV"] },
-  { id: "factory", label: "Factory", equipment: ["Siemens-S7-1500", "ABB-IRB6700", "Fanuc-R2000"] },
+  { id: "solar", label: "Solar", equipment: ["SMA-Sunny5000", "Fronius-Symo", "Huawei-SUN2000", "Other"] },
+  { id: "telecom", label: "Telecom", equipment: ["Cisco-ASR9000", "Nokia-FSED", "Ericsson-RBS", "ZTE-MF687", "Other"] },
+  { id: "hvac", label: "HVAC", equipment: ["Carrier-30XA", "Daikin-VRV", "Trane-CGAM", "Other"] },
+  { id: "lab", label: "Lab Equipment", equipment: ["Agilent-HPLC", "Thermo-Centrifuge", "Beckman-UV", "Other"] },
+  { id: "factory", label: "Factory", equipment: ["Siemens-S7-1500", "ABB-IRB6700", "Fanuc-R2000", "Other"] },
 ];
 
 const industryIcons: Record<Industry, React.ElementType> = {

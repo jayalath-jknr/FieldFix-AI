@@ -2,31 +2,55 @@
 FastAPI app. Key responsibilities:
 - Accept WebSocket connections at /ws/{session_id}
 - Multiplex binary audio frames and JSON control messages
-- Maintain per-session ADK LiveAgent runner
-- Handle barge-in: signal to agent when user starts speaking mid-response
-- Forward agent audio output back to client
+- Bridge frontend microphone/camera to Gemini Live (google.genai)
+- Auto-execute tool calls and return results to both Gemini and the frontend UI
 - Structured logging (Cloud Logging compatible JSON)
 """
 
 import asyncio
 import base64
 import json
+import os
 
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from google import genai
+from google.genai import types
 
 from core.config import settings
 from core.logging import get_logger
-from agent import create_agent_runner
+from agent import TOOLS_MAP, build_live_config
 
 logger = get_logger(__name__)
+
+_genai_client: genai.Client | None = None
+
+
+def _make_genai_client() -> genai.Client:
+    """Create a genai Client.
+
+    Tries (in order):
+    1. GOOGLE_API_KEY env var → plain AI Studio client
+    2. Vertex AI mode using ADC (works with `gcloud auth application-default login`)
+    """
+    api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GOOGLE_GENAI_API_KEY")
+    if api_key:
+        return genai.Client(api_key=api_key)
+    # Use Vertex AI mode — authenticates via Application Default Credentials
+    return genai.Client(
+        vertexai=True,
+        project=settings.gcp_project_id,
+        location=settings.gcp_region,
+    )
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler."""
+    global _genai_client
+    _genai_client = _make_genai_client()
     logger.info("FieldFix AI starting", env=settings.environment)
     yield
     logger.info("FieldFix AI shutting down")
@@ -44,9 +68,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# In-memory session registry (use Redis in production scale-out)
-active_sessions: dict[str, dict] = {}
 
 
 @app.get("/health")
@@ -68,7 +89,7 @@ async def list_industries():
             {
                 "id": "telecom",
                 "label": "Telecom",
-                "equipment": ["Cisco-ASR9000", "Nokia-FSED", "Ericsson-RBS"],
+                "equipment": ["Cisco-ASR9000", "Nokia-FSED", "Ericsson-RBS", "ZTE-MF687"],
             },
             {
                 "id": "hvac",
@@ -98,7 +119,6 @@ async def websocket_session(
     await websocket.accept()
     logger.info("WebSocket connected", session_id=session_id)
 
-    runner = None
     try:
         # First message must be session init
         init_raw = await asyncio.wait_for(websocket.receive_text(), timeout=10.0)
@@ -109,73 +129,129 @@ async def websocket_session(
         equipment_model = init_msg["equipment_model"]
         technician_id = init_msg.get("technician_id", "anonymous")
 
-        runner = await create_agent_runner(
-            session_id=session_id,
+        config = build_live_config(
             industry=industry,
             equipment_model=equipment_model,
             technician_id=technician_id,
         )
 
-        active_sessions[session_id] = {
-            "runner": runner,
-            "industry": industry,
-            "equipment_model": equipment_model,
-        }
+        if _genai_client is None:
+            await websocket.send_text(json.dumps({
+                "type": "error", "message": "Server not ready — genai client unavailable"
+            }))
+            await websocket.close(code=1011)
+            return
 
-        # Forward agent audio output to client
-        async def on_audio_output(audio_bytes: bytes):
-            await websocket.send_bytes(audio_bytes)
+        async with _genai_client.aio.live.connect(
+            model=settings.gemini_live_model, config=config
+        ) as live_session:
 
-        # Forward citation/step updates to client
-        async def on_tool_result(tool_name: str, result: dict):
+            # Notify frontend that the session is ready
             await websocket.send_text(
-                json.dumps(
-                    {
-                        "type": "tool_result",
-                        "tool": tool_name,
-                        "data": result,
-                    }
-                )
+                json.dumps({"type": "session_ready", "session_id": session_id})
             )
 
-        runner.on_audio_output(on_audio_output)
-        runner.on_tool_result(on_tool_result)
-        await runner.start()
+            # --- Task: receive from Gemini Live and forward to frontend ---
+            async def receive_from_gemini():
+                try:
+                    # Wrap in while True so we re-enter receive() after each
+                    # turn_complete — without this the agent goes silent after
+                    # its first response.
+                    while True:
+                        async for msg in live_session.receive():
+                            # Forward audio output to the browser
+                            if msg.data:
+                                await websocket.send_bytes(msg.data)
 
-        await websocket.send_text(
-            json.dumps(
-                {
-                    "type": "session_ready",
-                    "session_id": session_id,
-                }
-            )
-        )
+                            # Handle tool/function calls
+                            if msg.tool_call:
+                                responses = []
+                                for fc in msg.tool_call.function_calls:
+                                    func = TOOLS_MAP.get(fc.name)
+                                    if func:
+                                        try:
+                                            # Run blocking I/O (Firestore/GCS)
+                                            # off the event loop thread so it
+                                            # doesn't stall audio streaming.
+                                            result = await asyncio.to_thread(
+                                                func, **dict(fc.args)
+                                            )
+                                        except Exception as tool_err:
+                                            result = {"error": str(tool_err)}
+                                        responses.append(
+                                            types.FunctionResponse(
+                                                id=fc.id,
+                                                name=fc.name,
+                                                response=result
+                                                if isinstance(result, dict)
+                                                else {"result": str(result)},
+                                            )
+                                        )
+                                        # Forward result to frontend for UI update
+                                        try:
+                                            await websocket.send_text(
+                                                json.dumps(
+                                                    {
+                                                        "type": "tool_result",
+                                                        "tool": fc.name,
+                                                        "data": result,
+                                                    }
+                                                )
+                                            )
+                                        except Exception:
+                                            pass
+                                if responses:
+                                    await live_session.send_tool_response(
+                                        function_responses=responses
+                                    )
+                except Exception as recv_err:
+                    logger.error(
+                        "Gemini receive error",
+                        session_id=session_id,
+                        error=str(recv_err),
+                    )
 
-        # Main receive loop
-        while True:
-            message = await websocket.receive()
+            recv_task = asyncio.create_task(receive_from_gemini())
 
-            if "bytes" in message:
-                # Raw PCM audio from microphone
-                await runner.send_audio(message["bytes"])
+            try:
+                # --- Main loop: forward frontend messages to Gemini Live ---
+                while True:
+                    message = await websocket.receive()
 
-            elif "text" in message:
-                msg = json.loads(message["text"])
-
-                if msg["type"] == "video_frame":
-                    # Base64-encoded JPEG from camera
-                    frame_bytes = base64.b64decode(msg["data"])
-                    if len(frame_bytes) <= settings.max_frame_size_bytes:
-                        await runner.send_image(
-                            frame_bytes, mime_type="image/jpeg"
+                    if "bytes" in message:
+                        # Raw PCM audio from microphone (16 kHz, 16-bit, mono)
+                        await live_session.send_realtime_input(
+                            audio=types.Blob(
+                                data=message["bytes"],
+                                mime_type="audio/pcm;rate=16000",
+                            )
                         )
 
-                elif msg["type"] == "barge_in":
-                    # User started speaking — interrupt agent
-                    await runner.interrupt()
+                    elif "text" in message:
+                        msg = json.loads(message["text"])
 
-                elif msg["type"] == "end_session":
-                    break
+                        if msg["type"] == "video_frame":
+                            frame_bytes = base64.b64decode(msg["data"])
+                            if len(frame_bytes) <= settings.max_frame_size_bytes:
+                                await live_session.send_realtime_input(
+                                    video=types.Blob(
+                                        data=frame_bytes,
+                                        mime_type="image/jpeg",
+                                    )
+                                )
+
+                        elif msg["type"] == "barge_in":
+                            # VAD handles barge-in automatically; no action needed
+                            pass
+
+                        elif msg["type"] == "end_session":
+                            break
+            finally:
+                recv_task.cancel()
+                try:
+                    await recv_task
+                except asyncio.CancelledError:
+                    pass
 
     except WebSocketDisconnect:
         logger.info("WebSocket disconnected", session_id=session_id)
@@ -189,7 +265,4 @@ async def websocket_session(
         except Exception:
             pass
     finally:
-        if runner:
-            await runner.close()
-        active_sessions.pop(session_id, None)
         logger.info("Session cleaned up", session_id=session_id)

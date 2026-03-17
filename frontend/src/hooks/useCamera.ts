@@ -52,13 +52,19 @@ export function useCamera({
 
     if (video.videoWidth === 0) return;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // Cap to 640×480 to keep frame payloads small.
+    // Full 1280×720 JPEG frames add unnecessary bandwidth and serialisation
+    // overhead without improving AI analysis quality meaningfully.
+    const MAX_W = 640;
+    const MAX_H = 480;
+    const scale = Math.min(1, MAX_W / video.videoWidth, MAX_H / video.videoHeight);
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.drawImage(video, 0, 0);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const dataUrl = canvas.toDataURL("image/jpeg", quality);
     const base64 = dataUrl.split(",")[1];
     onFrame(base64);

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 /* ── FieldFix AI Design System ─────────────────────────────── */
@@ -141,6 +142,4 @@
   animation: shimmer 2s infinite;
 }
 
-/* ── Font Import ───────────────────────────────────────────── */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');

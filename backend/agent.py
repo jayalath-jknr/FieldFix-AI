@@ -1,11 +1,9 @@
 """
-ADK LiveAgent definition.
-One agent instance per WebSocket session (per technician on-site job).
+Gemini Live agent configuration for FieldFix AI.
+Uses google.genai directly for real-time audio/video streaming.
 """
 
-from google.adk.agents import Agent as LiveAgent
-from google.adk.runners import Runner as LiveRunner
-from google.genai.types import LiveConnectConfig, SpeechConfig, VoiceConfig
+from google.genai import types
 
 from core.config import settings
 from tools.visual_diagnosis import diagnose_frame
@@ -60,51 +58,40 @@ TONE:
 - Short sentences — the technician is working while listening
 """
 
+# Map of function name → callable for tool dispatch in the WebSocket handler
+TOOLS_MAP = {
+    "diagnose_frame": diagnose_frame,
+    "search_manual": search_manual,
+    "lookup_similar_cases": lookup_similar_cases,
+    "save_resolved_case": save_resolved_case,
+}
 
-async def create_agent_runner(
-    session_id: str,
+
+def build_live_config(
     industry: str,
     equipment_model: str,
     technician_id: str,
-) -> LiveRunner:
-    """Create a new ADK LiveRunner for a WebSocket session."""
+) -> types.LiveConnectConfig:
+    """Build a LiveConnectConfig for a technician session."""
     system = SYSTEM_PROMPT.format(
         industry=industry,
         equipment_model=equipment_model,
         technician_id=technician_id,
     )
-
-    agent = LiveAgent(
-        model=settings.gemini_live_model,
+    return types.LiveConnectConfig(
         system_instruction=system,
-        tools=[
-            diagnose_frame,
-            search_manual,
-            lookup_similar_cases,
-            save_resolved_case,
-        ],
-        config=LiveConnectConfig(
-            response_modalities=["AUDIO"],
-            speech_config=SpeechConfig(
-                voice_config=VoiceConfig(
-                    prebuilt_voice_config={"voice_name": "Aoede"}
-                )
-            ),
-            enable_affective_dialog=True,
-            # Barge-in: agent stops when user speaks
-            realtime_input_config={
-                "automatic_activity_detection": {
-                    "disabled": False,
-                    "start_of_speech_sensitivity": "START_SENSITIVITY_HIGH",
-                    "end_of_speech_sensitivity": "END_SENSITIVITY_HIGH",
-                }
-            },
+        response_modalities=["AUDIO"],
+        speech_config=types.SpeechConfig(
+            voice_config=types.VoiceConfig(
+                prebuilt_voice_config={"voice_name": "Aoede"}
+            )
+        ),
+        tools=[diagnose_frame, search_manual, lookup_similar_cases, save_resolved_case],
+        realtime_input_config=types.RealtimeInputConfig(
+            automatic_activity_detection=types.AutomaticActivityDetection(
+                disabled=False,
+                start_of_speech_sensitivity="START_SENSITIVITY_HIGH",
+                end_of_speech_sensitivity="END_SENSITIVITY_HIGH",
+            )
         ),
     )
-
-    runner = LiveRunner(
-        agent=agent,
-        session_id=session_id,
-    )
-
-    return runner

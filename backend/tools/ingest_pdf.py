@@ -62,7 +62,16 @@ def chunk_text(text: str, page_num: int, source: str) -> list[dict]:
 
 def embed_chunks(chunks: list[dict]) -> list[dict]:
     """Add embeddings to all chunks using Vertex AI text-embedding-004."""
-    client = genai.Client()
+    import os
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if api_key:
+        client = genai.Client(api_key=api_key)
+    else:
+        client = genai.Client(
+            vertexai=True,
+            project=settings.gcp_project_id,
+            location=settings.gcp_region,
+        )
     embedded = []
 
     batch_size = 5  # Embed in batches to respect rate limits
@@ -73,7 +82,7 @@ def embed_chunks(chunks: list[dict]) -> list[dict]:
         for j, text in enumerate(texts):
             response = client.models.embed_content(
                 model=settings.embedding_model,
-                content=text,
+                contents=text,
             )
             batch[j]["embedding"] = response.embeddings[0].values
 

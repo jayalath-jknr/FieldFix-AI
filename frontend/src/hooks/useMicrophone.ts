@@ -1,14 +1,46 @@
 /**
  * Microphone hook — captures raw PCM at 16kHz (what Gemini Live expects).
- * Uses AudioWorklet with ScriptProcessor fallback for broad compatibility.
+ * Uses AudioWorkletNode (ScriptProcessorNode is deprecated).
+ * Accumulates 1024-sample (64ms) chunks for low-latency streaming.
  * Detects speech start for barge-in notification to backend.
  */
 
 import { useCallback, useRef, useState } from "react";
 
 const SAMPLE_RATE = 16000;
-const BUFFER_SIZE = 4096;
 const SPEECH_THRESHOLD = 0.01;
+
+// Inline AudioWorklet processor: accumulates 1024 samples, converts to
+// Int16 PCM, computes RMS, and posts both back to the main thread.
+const WORKLET_CODE = `
+class PCMProcessor extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    this._buf = new Float32Array(1024);
+    this._idx = 0;
+  }
+  process(inputs) {
+    const ch = inputs[0] && inputs[0][0];
+    if (!ch) return true;
+    for (let i = 0; i < ch.length; i++) {
+      this._buf[this._idx++] = ch[i];
+      if (this._idx >= 1024) {
+        const int16 = new Int16Array(1024);
+        let sum = 0;
+        for (let j = 0; j < 1024; j++) {
+          const s = this._buf[j];
+          sum += s * s;
+          int16[j] = Math.max(-32768, Math.min(32767, Math.round(s * 32767)));
+        }
+        this.port.postMessage({ pcm: int16.buffer, rms: Math.sqrt(sum / 1024) }, [int16.buffer]);
+        this._idx = 0;
+      }
+    }
+    return true;
+  }
+}
+registerProcessor('pcm-processor', PCMProcessor);
+`;
 
 interface UseMicrophoneOptions {
   onAudioChunk: (pcmBuffer: ArrayBuffer) => void;
@@ -17,7 +49,7 @@ interface UseMicrophoneOptions {
 
 export function useMicrophone({ onAudioChunk, onSpeechStart }: UseMicrophoneOptions) {
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -39,41 +71,33 @@ export function useMicrophone({ onAudioChunk, onSpeechStart }: UseMicrophoneOpti
       const audioCtx = new AudioContext({ sampleRate: SAMPLE_RATE });
       audioCtxRef.current = audioCtx;
 
+      // Load processor from a Blob URL so no separate file is needed
+      const blob = new Blob([WORKLET_CODE], { type: "application/javascript" });
+      const url = URL.createObjectURL(blob);
+      await audioCtx.audioWorklet.addModule(url);
+      URL.revokeObjectURL(url);
+
       const source = audioCtx.createMediaStreamSource(stream);
       sourceRef.current = source;
 
-      const processor = audioCtx.createScriptProcessor(BUFFER_SIZE, 1, 1);
-      processorRef.current = processor;
+      const workletNode = new AudioWorkletNode(audioCtx, "pcm-processor");
+      workletNodeRef.current = workletNode;
 
-      processor.onaudioprocess = (e) => {
-        const float32 = e.inputBuffer.getChannelData(0);
-
-        // RMS for speech detection
-        const rms = Math.sqrt(
-          float32.reduce((sum, s) => sum + s * s, 0) / float32.length
-        );
+      workletNode.port.onmessage = (e: MessageEvent<{ pcm: ArrayBuffer; rms: number }>) => {
+        const { pcm, rms } = e.data;
         const isSpeaking = rms > SPEECH_THRESHOLD;
-
         if (isSpeaking && !wasSpeaking.current) {
           onSpeechStart();
           wasSpeaking.current = true;
         } else if (!isSpeaking) {
           wasSpeaking.current = false;
         }
-
-        // Convert Float32 to Int16 PCM
-        const int16 = new Int16Array(float32.length);
-        for (let i = 0; i < float32.length; i++) {
-          int16[i] = Math.max(
-            -32768,
-            Math.min(32767, Math.round(float32[i] * 32767))
-          );
-        }
-        onAudioChunk(int16.buffer);
+        onAudioChunk(pcm);
       };
 
-      source.connect(processor);
-      processor.connect(audioCtx.destination);
+      source.connect(workletNode);
+      // Connect to destination to keep the graph alive (output is silent)
+      workletNode.connect(audioCtx.destination);
       setIsRecording(true);
     } catch (err) {
       throw new Error(
@@ -83,7 +107,8 @@ export function useMicrophone({ onAudioChunk, onSpeechStart }: UseMicrophoneOpti
   }, [onAudioChunk, onSpeechStart]);
 
   const stopRecording = useCallback(() => {
-    processorRef.current?.disconnect();
+    workletNodeRef.current?.port.close();
+    workletNodeRef.current?.disconnect();
     sourceRef.current?.disconnect();
     audioCtxRef.current?.close();
     streamRef.current?.getTracks().forEach((t) => t.stop());

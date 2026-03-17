@@ -41,7 +41,7 @@ steps:
     entrypoint: 'bash'
     args:
       - '-c'
-      - 'npm ci && npm run build'
+      - 'npm ci --legacy-peer-deps && npm run build'
 
 substitutions:
   _REGION: us-central1

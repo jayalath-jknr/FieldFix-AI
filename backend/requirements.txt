@@ -2,10 +2,9 @@ fastapi==0.115.0
 uvicorn[standard]>=0.34.0
 websockets==13.1
 google-genai>=1.14.0
-google-adk==1.0.0
 google-cloud-firestore==2.19.0
 google-cloud-storage==2.18.2
-pydantic==2.9.2
+pydantic>=2.11.0
 pydantic-settings==2.6.1
 PyMuPDF==1.24.13
 numpy==2.1.3

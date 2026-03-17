@@ -15,6 +15,9 @@ const RECONNECT_BASE_MS = 1000;
 // Audio playback via Web Audio API
 let audioCtx: AudioContext | null = null;
 let nextPlayTime = 0;
+// If nextPlayTime has drifted more than this many seconds into the future,
+// we suspect a stale queue and snap back to play immediately.
+const MAX_QUEUE_AHEAD_SEC = 0.5;
 
 function playAudioChunk(buffer: ArrayBuffer) {
   if (!audioCtx) audioCtx = new AudioContext({ sampleRate: 24000 });
@@ -33,7 +36,11 @@ function playAudioChunk(buffer: ArrayBuffer) {
   source.buffer = audioBuffer;
   source.connect(audioCtx.destination);
 
-  const startTime = Math.max(audioCtx.currentTime, nextPlayTime);
+  const now = audioCtx.currentTime;
+  // Reset if the queue has drifted too far behind real-time (e.g. after a
+  // tab switch or a long silence) to avoid a stale backlog.
+  if (nextPlayTime < now - MAX_QUEUE_AHEAD_SEC) nextPlayTime = now;
+  const startTime = Math.max(now, nextPlayTime);
   source.start(startTime);
   nextPlayTime = startTime + audioBuffer.duration;
 }
@@ -78,7 +85,9 @@ export function useWebSocket() {
 
   const connect = useCallback(
     (sid: string, industry: string, equipmentModel: string) => {
-      if (wsRef.current?.readyState === WebSocket.OPEN) return;
+      // Prevent duplicate connections: skip if already open OR still connecting
+      const state = wsRef.current?.readyState;
+      if (state === WebSocket.OPEN || state === WebSocket.CONNECTING) return;
 
       setIsConnecting(true);
       const ws = new WebSocket(`${WS_URL}/ws/${sid}`);
@@ -100,11 +109,18 @@ export function useWebSocket() {
         );
       };
 
+      let agentWasSpeaking = false;
       ws.onmessage = (event) => {
         if (event.data instanceof ArrayBuffer) {
           playAudioChunk(event.data);
-          setAgentState("speaking");
+          // Only update React state on the transition, not every chunk,
+          // to avoid flooding the render queue.
+          if (!agentWasSpeaking) {
+            setAgentState("speaking");
+            agentWasSpeaking = true;
+          }
         } else {
+          agentWasSpeaking = false; // text message = turn boundary
           const msg = JSON.parse(event.data as string);
           handleControlMessage(msg);
         }
@@ -112,8 +128,15 @@ export function useWebSocket() {
 
       ws.onerror = () => setError("Connection error");
 
-      ws.onclose = () => {
+      ws.onclose = (event) => {
         setConnected(false);
+        // Don't retry on server-side deliberate close (e.g. Gemini auth failure)
+        // code 1011 = Internal Error (server crashed), 1008 = Policy Violation
+        // Retrying these will just fail again immediately.
+        if (event.code === 1011 || event.code === 1008) {
+          setError("Session failed — check that the backend is running and GCP credentials are valid.");
+          return;
+        }
         if (reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS) {
           const delay =
             RECONNECT_BASE_MS *
