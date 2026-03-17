@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FieldFix AI — Pitch Deck</title>
+<style>
+  :root {
+    --blue:    #3b82f6;
+    --blue-d:  #1d4ed8;
+    --cyan:    #06b6d4;
+    --green:   #22c55e;
+    --amber:   #f59e0b;
+    --red:     #ef4444;
+    --bg:      #0f172a;
+    --bg2:     #1e293b;
+    --bg3:     #334155;
+    --text:    #f1f5f9;
+    --muted:   #94a3b8;
+    --border:  #334155;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+  /* ── DECK CONTAINER ── */
+  #deck { width: 100vw; height: 100vh; position: relative; }
+
+  /* ── SLIDE BASE ── */
+  .slide {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column;
+    background: var(--bg);
+    color: var(--text);
+    padding: 52px 72px;
+    overflow: hidden;
+  }
+  .slide.active { display: flex; }
+
+  /* ── SLIDE NUMBER ── */
+  .slide-num {
+    position: absolute; bottom: 22px; right: 36px;
+    font-size: 12px; color: var(--muted); letter-spacing: .5px;
+  }
+
+  /* ── HEADER BAR ── */
+  .slide-label {
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 10px; font-weight: 600;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h1 { font-size: clamp(2rem, 4vw, 3.4rem); font-weight: 800; line-height: 1.1; }
+  h2 { font-size: clamp(1.4rem, 2.5vw, 2.2rem); font-weight: 700; line-height: 1.2; margin-bottom: 24px; }
+  h3 { font-size: clamp(1rem, 1.8vw, 1.5rem); font-weight: 600; color: var(--cyan); margin-bottom: 12px; }
+  p  { font-size: clamp(.85rem, 1.3vw, 1.05rem); color: var(--muted); line-height: 1.65; }
+  strong { color: var(--text); }
+
+  /* ── ACCENT ── */
+  .accent { color: var(--cyan); }
+  .accent-g { color: var(--green); }
+  .accent-a { color: var(--amber); }
+  .accent-r { color: var(--red); }
+
+  /* ── PILL ── */
+  .pill {
+    display: inline-block; padding: 3px 12px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: .5px;
+    background: rgba(59,130,246,.15); color: var(--blue); border: 1px solid rgba(59,130,246,.3);
+    margin-right: 6px; margin-bottom: 6px;
+  }
+
+  /* ── GRID HELPERS ── */
+  .cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; flex: 1; align-items: start; }
+  .cols-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; flex: 1; align-items: start; }
+  .col { display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px;
+  }
+  .card-title { font-size: .85rem; font-weight: 700; color: var(--cyan); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── STAT BOX ── */
+  .stat { text-align: center; }
+  .stat .num { font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 800; color: var(--cyan); line-height: 1; }
+  .stat .label { font-size: .78rem; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th { background: var(--bg3); color: var(--cyan); padding: 10px 14px; text-align: left; font-size: .75rem; letter-spacing: 1px; text-transform: uppercase; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--muted); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .check { color: var(--green); font-weight: 700; }
+  .cross { color: var(--red); font-weight: 700; }
+
+  /* ── BULLET LIST ── */
+  ul.styled { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.styled li { display: flex; align-items: flex-start; gap: 10px; font-size: .92rem; color: var(--muted); line-height: 1.5; }
+  ul.styled li::before { content: '▸'; color: var(--cyan); flex-shrink: 0; margin-top: 1px; }
+  ul.styled li strong { color: var(--text); }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+  .flow-step {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+    font-size: .78rem; color: var(--text); text-align: center; line-height: 1.35;
+    flex-shrink: 0;
+  }
+  .flow-arrow { color: var(--blue); font-size: 1.1rem; padding: 0 6px; flex-shrink: 0; }
+
+  /* ── CODE BLOCK ── */
+  .code {
+    background: #0a0f1e; border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px;
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+    font-size: .72rem; color: #7dd3fc; line-height: 1.6;
+    white-space: pre; overflow-x: auto;
+  }
+
+  /* ── MATRIX (2x2) ── */
+  .matrix-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+  .matrix {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 3px;
+    width: 100%; max-width: 680px;
+    position: relative;
+  }
+  .matrix-cell {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px;
+    font-size: .82rem; color: var(--muted); line-height: 1.5;
+    min-height: 110px;
+  }
+  .matrix-cell.highlight {
+    background: rgba(59,130,246,.12); border-color: var(--blue);
+    color: var(--text);
+  }
+  .matrix-cell .cell-title { font-weight: 700; color: var(--cyan); font-size: .8rem; margin-bottom: 4px; }
+  .axis-label {
+    font-size: .68rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase;
+    text-align: center; padding: 4px;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar { height: 6px; background: var(--bg3); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--cyan), var(--blue)); }
+
+  /* ── TITLE SLIDE SPECIAL ── */
+  #slide-1 {
+    background: radial-gradient(ellipse at 80% 50%, rgba(59,130,246,.15) 0%, transparent 55%),
+                radial-gradient(ellipse at 10% 80%, rgba(6,182,212,.1) 0%, transparent 45%),
+                var(--bg);
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0;
+    gap: 0;
+  }
+  #slide-1 .s1-left {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    padding: 52px 56px; gap: 0; min-width: 0;
+  }
+  #slide-1 .s1-right {
+    width: 44%; background: rgba(15,23,42,.75);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px 20px; position: relative; overflow: hidden;
+  }
+  #slide-1 .s1-right::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 60% 40%, rgba(6,182,212,.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  #slide-1 .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  #slide-1 h1 {
+    font-size: clamp(2.8rem, 5vw, 5rem); font-weight: 900; line-height: 1;
+    background: linear-gradient(135deg, #fff 30%, var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 14px;
+  }
+  #slide-1 .tagline { font-size: clamp(.95rem, 1.5vw, 1.3rem); color: var(--muted); margin-bottom: 20px; }
+  #slide-1 .powered { font-size: .75rem; color: var(--muted); margin-top: 28px; border-top: 1px solid var(--border); padding-top: 16px; }
+  #slide-1 .s1-stat {
+    background: rgba(15,23,42,.8); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 22px; width: 100%; text-align: center; position: relative; z-index: 1;
+  }
+  #slide-1 .s1-stat .snum { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+  #slide-1 .s1-stat .slabel { font-size: .72rem; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+  #slide-1 .s1-logo {
+    width: 80px; height: 80px; border-radius: 20px;
+    background: linear-gradient(135deg, var(--blue), var(--cyan));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; margin-bottom: 8px; position: relative; z-index: 1;
+    box-shadow: 0 0 40px rgba(6,182,212,.3);
+  }
+
+  /* ── NAVIGATION ── */
+  #nav {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px; z-index: 100;
+    background: rgba(15,23,42,.85); backdrop-filter: blur(12px);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 8px 20px;
+  }
+  #nav button {
+    background: none; border: none; color: var(--text); cursor: pointer;
+    font-size: 16px; padding: 4px 10px; border-radius: 6px;
+    transition: background .15s;
+  }
+  #nav button:hover { background: var(--bg3); }
+  #nav button:disabled { color: var(--muted); cursor: default; }
+  #nav button:disabled:hover { background: none; }
+  #nav-counter { font-size: 12px; color: var(--muted); min-width: 54px; text-align: center; }
+
+  /* ── PROGRESS DOTS ── */
+  #dots { display: flex; gap: 6px; align-items: center; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--bg3); cursor: pointer; transition: all .2s;
+  }
+  .dot.active { background: var(--cyan); transform: scale(1.4); }
+
+  /* ── FULLSCREEN BTN ── */
+  #fs-btn {
+    position: fixed; top: 20px; right: 24px; z-index: 100;
+    background: rgba(15,23,42,.7); border: 1px solid var(--border);
+    color: var(--muted); padding: 6px 14px; border-radius: 8px;
+    font-size: 12px; cursor: pointer; backdrop-filter: blur(8px);
+  }
+  #fs-btn:hover { color: var(--text); border-color: var(--blue); }
+
+  /* ── TIMELINE ── */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-item { display: flex; gap: 16px; align-items: stretch; }
+  .tl-line { display: flex; flex-direction: column; align-items: center; }
+  .tl-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); flex-shrink: 0; margin-top: 5px; }
+  .tl-track { width: 2px; background: var(--border); flex: 1; margin: 3px 0; }
+  .tl-item:last-child .tl-track { display: none; }
+  .tl-content { padding-bottom: 16px; }
+  .tl-month { font-size: .72rem; color: var(--cyan); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .tl-desc { font-size: .85rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── REVENUE CARD ── */
+  .rev-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .rev-card .rev-num { font-size: 2rem; font-weight: 800; line-height: 1; }
+  .rev-card .rev-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .rev-card .rev-desc { font-size: .82rem; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- ══ SLIDE 1 — TITLE ══ -->
+  <div class="slide active" id="slide-1">
+    <!-- LEFT: text content -->
+    <div class="s1-left">
+      <div class="tag-row">
+        <span class="pill">#GeminiLiveAPI</span>
+        <span class="pill">#GoogleCloud</span>
+        <span class="pill">#FieldService</span>
+        <span class="pill">#HackathonDemo</span>
+      </div>
+      <h1>FieldFix AI</h1>
+      <p class="tagline">The Senior Engineer in Every Technician's Ear</p>
+      <p style="font-size:clamp(.85rem,1.2vw,1rem); color:var(--muted); line-height:1.7;">
+        Real-time multimodal AI for field repair &mdash; <strong>voice + vision + manual-grounded answers.</strong><br>
+        Powered by <strong style="color:var(--cyan);">Gemini 2.0 Flash Live API</strong> &middot; Google Cloud Run &middot; Firestore &middot; React PWA
+      </p>
+      <p class="powered">Built for the Gemini Live Agent Hackathon &middot; March 2026 &middot; Nirasha Jayalath</p>
+    </div>
+    <!-- RIGHT: visual panel -->
+    <div class="s1-right">
+      <!-- Inline SVG illustration: field technician scene -->
+      <svg viewBox="0 0 340 420" width="100%" style="max-width:320px;position:relative;z-index:1;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#3b82f6"/>
+            <stop offset="100%" stop-color="#06b6d4"/>
+          </linearGradient>
+          <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1e293b"/>
+            <stop offset="100%" stop-color="#0f172a"/>
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Background glow circle -->
+        <circle cx="170" cy="200" r="150" fill="rgba(59,130,246,0.06)"/>
+        <circle cx="170" cy="200" r="110" fill="rgba(6,182,212,0.05)"/>
+
+        <!-- Router / Equipment box -->
+        <rect x="80" y="220" width="180" height="100" rx="12" fill="url(#g2)" stroke="#334155" stroke-width="1.5"/>
+        <rect x="93" y="233" width="154" height="62" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+        <!-- LED row -->
+        <circle cx="110" cy="308" r="5" fill="#ef4444" filter="url(#glow)"/>
+        <circle cx="128" cy="308" r="5" fill="#f59e0b"/>
+        <circle cx="146" cy="308" r="5" fill="#22c55e" filter="url(#glow)"/>
+        <circle cx="164" cy="308" r="5" fill="#22c55e" filter="url(#glow)"/>
+        <circle cx="182" cy="308" r="5" fill="#3b82f6"/>
+        <!-- Vent slots -->
+        <rect x="210" y="300" width="3" height="12" rx="1" fill="#334155"/>
+        <rect x="217" y="300" width="3" height="12" rx="1" fill="#334155"/>
+        <rect x="224" y="300" width="3" height="12" rx="1" fill="#334155"/>
+        <rect x="231" y="300" width="3" height="12" rx="1" fill="#334155"/>
+        <!-- Router label -->
+        <text x="170" y="264" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">ZTE MF687</text>
+        <rect x="100" y="270" width="140" height="18" rx="3" fill="#1e293b"/>
+        <rect x="103" y="273" width="50" height="12" rx="2" fill="#22c55e" opacity="0.7"/>
+        <text x="128" y="282" text-anchor="middle" fill="#0f172a" font-size="7" font-family="monospace" font-weight="bold">4G LTE</text>
+        <rect x="157" y="273" width="30" height="12" rx="2" fill="#ef4444" opacity="0.7"/>
+        <text x="172" y="282" text-anchor="middle" fill="#fff" font-size="7" font-family="monospace" font-weight="bold">SIM</text>
+
+        <!-- Signal waves from router -->
+        <path d="M170 218 Q170 190 170 175" stroke="#3b82f6" stroke-width="1" fill="none" stroke-dasharray="3,3" opacity="0.5"/>
+        <path d="M155 215 Q140 185 135 160" stroke="#06b6d4" stroke-width="1" fill="none" stroke-dasharray="3,3" opacity="0.4"/>
+        <path d="M185 215 Q200 185 205 160" stroke="#06b6d4" stroke-width="1" fill="none" stroke-dasharray="3,3" opacity="0.4"/>
+
+        <!-- Phone / Technician device -->
+        <rect x="130" y="90" width="80" height="135" rx="10" fill="url(#g2)" stroke="url(#g1)" stroke-width="2"/>
+        <rect x="136" y="100" width="68" height="100" rx="5" fill="#0f172a"/>
+        <!-- Phone screen content -->
+        <rect x="140" y="104" width="60" height="14" rx="3" fill="#1e293b"/>
+        <text x="170" y="114" text-anchor="middle" fill="#06b6d4" font-size="7" font-family="monospace">FieldFix AI</text>
+        <!-- Waveform / audio indicator -->
+        <rect x="142" y="123" width="3" height="6" rx="1" fill="#3b82f6"/>
+        <rect x="148" y="120" width="3" height="12" rx="1" fill="#06b6d4"/>
+        <rect x="154" y="118" width="3" height="16" rx="1" fill="#3b82f6"/>
+        <rect x="160" y="121" width="3" height="10" rx="1" fill="#06b6d4"/>
+        <rect x="166" y="123" width="3" height="6" rx="1" fill="#3b82f6"/>
+        <rect x="172" y="119" width="3" height="14" rx="1" fill="#06b6d4"/>
+        <rect x="178" y="121" width="3" height="10" rx="1" fill="#3b82f6"/>
+        <rect x="184" y="123" width="3" height="6" rx="1" fill="#06b6d4"/>
+        <rect x="190" y="120" width="3" height="12" rx="1" fill="#3b82f6"/>
+        <!-- Citation card on screen -->
+        <rect x="140" y="142" width="60" height="30" rx="3" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <rect x="143" y="145" width="20" height="3" rx="1" fill="#06b6d4" opacity="0.8"/>
+        <rect x="143" y="151" width="54" height="2" rx="1" fill="#334155"/>
+        <rect x="143" y="156" width="40" height="2" rx="1" fill="#334155"/>
+        <rect x="143" y="161" width="48" height="2" rx="1" fill="#334155"/>
+        <!-- Step tracker dots on screen -->
+        <circle cx="148" cy="176" r="4" fill="#22c55e"/>
+        <circle cx="162" cy="176" r="4" fill="#22c55e"/>
+        <circle cx="176" cy="176" r="4" fill="#3b82f6" stroke="#3b82f6" stroke-width="1" fill-opacity="0.4"/>
+        <circle cx="190" cy="176" r="4" fill="#334155"/>
+        <!-- Phone home button -->
+        <circle cx="170" cy="205" r="6" fill="none" stroke="#334155" stroke-width="1.5"/>
+
+        <!-- Person silhouette holding phone -->
+        <!-- Head -->
+        <circle cx="260" cy="148" r="22" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+        <circle cx="260" cy="148" r="16" fill="#2d3a4f"/>
+        <!-- Hard hat -->
+        <path d="M238 138 Q260 120 282 138 L284 142 Q260 132 236 142 Z" fill="url(#g1)" opacity="0.9"/>
+        <rect x="234" y="142" width="52" height="5" rx="2" fill="#2563eb"/>
+        <!-- Body -->
+        <rect x="240" y="175" width="40" height="55" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+        <!-- Hi-vis vest stripes -->
+        <path d="M240 188 L280 188" stroke="#f59e0b" stroke-width="2.5" opacity="0.7"/>
+        <path d="M240 196 L280 196" stroke="#f59e0b" stroke-width="2.5" opacity="0.7"/>
+        <!-- Arm holding phone -->
+        <path d="M240 185 Q220 195 215 210" stroke="#1e293b" stroke-width="12" stroke-linecap="round" fill="none"/>
+        <path d="M240 185 Q220 195 215 210" stroke="#334155" stroke-width="10" stroke-linecap="round" fill="none"/>
+        <!-- Hand -->
+        <circle cx="214" cy="213" r="7" fill="#2d3a4f"/>
+
+        <!-- Connection line from phone to router -->
+        <path d="M210 215 Q190 218 183 220" stroke="#06b6d4" stroke-width="1.5" fill="none" stroke-dasharray="4,3" opacity="0.6"/>
+
+        <!-- Floating "AI thinking" dots -->
+        <circle cx="60" cy="120" r="4" fill="#3b82f6" opacity="0.5"/>
+        <circle cx="75" cy="100" r="3" fill="#06b6d4" opacity="0.4"/>
+        <circle cx="50" cy="95" r="2" fill="#3b82f6" opacity="0.3"/>
+        <!-- Check mark badge -->
+        <circle cx="298" cy="110" r="14" fill="#22c55e" opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+        <path d="M291 110 L296 115 L305 105" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="298" y="130" text-anchor="middle" fill="#22c55e" font-size="8" font-family="sans-serif">Fixed!</text>
+
+        <!-- Bottom label -->
+        <text x="170" y="395" text-anchor="middle" fill="#475569" font-size="9" font-family="sans-serif">Technician · AI Agent · Manual · Resolution</text>
+      </svg>
+    </div>
+    <div class="slide-num">1 / 11</div>
+  </div>
+
+  <!-- ══ SLIDE 2 — PROBLEM ══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-label">The Problem</div>
+    <h2>A <span class="accent">$47B</span> Industry Running on Phone Calls &amp; PDFs</h2>
+    <div class="cols-2" style="align-items:stretch;">
+      <div class="col" style="gap:14px;">
+        <div class="card">
+          <div class="card-title">The Scene</div>
+          <p>8 AM. A field technician drives 2 hours to a site. An LTE router is down. The fault code is unfamiliar. The 400-page manual is back in the van. The senior engineer is in a meeting until noon.</p>
+          <p style="margin-top:10px; color:#f59e0b; font-weight:600;">This is not an edge case. This is Tuesday.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">The 4 Failure Modes</div>
+          <ul class="styled" style="gap:7px;">
+            <li><strong>Escalation call:</strong> 45–90 min delay per incident</li>
+            <li><strong>Wrong diagnosis:</strong> $800–$2,400 per repeat truck roll</li>
+            <li><strong>Safety incident:</strong> Ungrounded advice = liability</li>
+            <li><strong>Brain drain:</strong> Senior engineer leaves &rarr; knowledge gone</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col" style="gap:18px;">
+        <div class="stat card">
+          <div class="num accent">3.2×</div>
+          <div class="label">Average phone escalations<br>per technician shift<br><em style="font-size:.7rem">(ServiceMax 2024)</em></div>
+        </div>
+        <div class="stat card">
+          <div class="num accent-a">27%</div>
+          <div class="label">Field dispatches result in<br>a <strong>repeat visit</strong> due to misdiagnosis<br><em style="font-size:.7rem">(Aberdeen Group)</em></div>
+        </div>
+        <div class="stat card">
+          <div class="num accent-r">$1,600</div>
+          <div class="label">Average cost of a<br><strong>failed first-time fix</strong><br><em style="font-size:.7rem">(wasted labor + re-dispatch)</em></div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">2 / 11</div>
+  </div>
+
+  <!-- ══ SLIDE 3 — ROOT CAUSE ══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-label">Root Cause</div>
+    <h2>The Problem Isn't Knowledge. It's <span class="accent">Access.</span></h2>
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:28px;">
+      <p style="font-size:clamp(1rem,1.6vw,1.25rem); max-width:700px;">The manual exists. It has every answer. The senior engineer exists. They know every fault.<br><br>
+      But neither is accessible <strong>in the moment — with dirty hands, under pressure, at the equipment.</strong></p>
+      <div class="cols-3" style="flex:unset;">
+        <div class="card" style="border-color:rgba(239,68,68,.4);">
+          <div class="card-title" style="color:var(--red);">Hands Occupied</div>
+          <p>Can't type, can't scroll. A field technician's primary interface must be voice.</p>
+        </div>
+        <div class="card" style="border-color:rgba(245,158,11,.4);">
+          <div class="card-title" style="color:var(--amber);">Bad Connectivity</div>
+          <p>Rural sites, rooftops, basements. Any solution must survive a weak mobile signal.</p>
+        </div>
+        <div class="card" style="border-color:rgba(59,130,246,.4);">
+          <div class="card-title">No Shared Memory</div>
+          <p>Every repair starts from zero. The fix your colleague did last week is lost unless written down.</p>
+        </div>
+      </div>
+      <div class="card" style="border-color:rgba(6,182,212,.4); background:rgba(6,182,212,.06);">
+        <p style="color:var(--text); font-size:.95rem;"><strong>The insight:</strong> We don't need a smarter chatbot. We need a system that can <em>see</em> what the technician sees, <em>hear</em> them out, and deliver grounded answers — one step at a time — hands-free, in real time.</p>
+      </div>
+    </div>
+    <div class="slide-num">3 / 11</div>
+  </div>
+
+  <!-- ══ SLIDE 4 — SOLUTION ══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-label">The Solution</div>
+    <h2>FieldFix AI &mdash; <span class="accent">Point. Speak. Fix.</span></h2>
+    <div class="cols-2" style="align-items:stretch; flex:1;">
+      <div class="col">
+        <div class="card" style="border-color:rgba(6,182,212,.4);">
+          <div class="card-title">Three Core Capabilities</div>
+          <ul class="styled">
+            <li><strong>See:</strong> Point your camera at the equipment. The AI identifies the device and reads the fault state in real time.</li>
+            <li><strong>Speak:</strong> Describe the symptom by voice. No typing. Fully hands-free.</li>
+            <li><strong>Guided Fix:</strong> Receive one step at a time, read aloud, cited from the actual manual. Interrupt at any moment.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Three Hard AI Constraints</div>
+          <ul class="styled">
+            <li><span class="cross">✗</span> <strong>No advice without a manual citation</strong> — hallucinations are eliminated by design</li>
+            <li><span class="check">✓</span> <strong>One step at a time</strong> — waits for confirmation before proceeding</li>
+            <li><span class="check">✓</span> <strong>Fully interruptible</strong> — technician cuts in, AI stops mid-sentence</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card-title" style="margin-bottom:12px;">The 7-Step Flow</div>
+        <div class="flow" style="flex-direction:column; align-items:stretch; gap:4px;">
+          <div class="flow-step" style="background:rgba(59,130,246,.1); border-color:var(--blue);">① Select industry &amp; equipment model</div>
+          <div style="text-align:center; color:var(--blue);">↓</div>
+          <div class="flow-step">② Point camera at device → <strong class="accent">diagnose_frame</strong></div>
+          <div style="text-align:center; color:var(--blue);">↓</div>
+          <div class="flow-step">③ Describe fault by voice → <strong class="accent">Gemini Live API</strong></div>
+          <div style="text-align:center; color:var(--blue);">↓</div>
+          <div class="flow-step">④ <strong class="accent">search_manual</strong> → RAG → cited answer</div>
+          <div style="text-align:center; color:var(--blue);">↓</div>
+          <div class="flow-step">⑤ <strong class="accent">lookup_similar_cases</strong> → Firestore → past fixes</div>
+          <div style="text-align:center; color:var(--blue);">↓</div>
+          <div class="flow-step">⑥ One step → confirm → next step → resolved</div>
+          <div style="text-align:center; color:var(--blue);">↓</div>
+          <div class="flow-step" style="background:rgba(34,197,94,.1); border-color:var(--green);">⑦ <strong class="accent-g">save_resolved_case</strong> → Firestore (team learns)</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">4 / 11</div>
+  </div>
+
+  <!-- ══ SLIDE 5 — ARCHITECTURE ══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-label">How It Works</div>
+    <h2>Architecture Built for the <span class="accent">Field</span></h2>
+    <div class="cols-2" style="flex:1; align-items:stretch;">
+      <div class="col">
+        <div class="code">┌─────────────────────────────────┐
+│       TECHNICIAN'S PHONE         │
+│  React PWA · AudioWorklet        │
+│  Camera · Zustand State          │
+└───────────┬─────────────────────┘
+            │ Single Multiplexed WebSocket
+            │ (binary PCM audio + JSON frames)
+┌───────────▼─────────────────────┐
+│    FastAPI  ·  Cloud Run         │
+│  ┌───────────────────────────┐  │
+│  │  Gemini 2.0 Flash Live    │  │
+│  │  Bidirectional Audio+Vision│  │
+│  └────────────┬──────────────┘  │
+│               │ Tool Calls       │
+│  ┌────────────▼──────────────┐  │
+│  │ diagnose_frame             │  │
+│  │ search_manual (RAG)        │  │
+│  │ lookup_similar_cases       │  │
+│  │ save_resolved_case         │  │
+│  └────────┬──────────┬───────┘  │
+└───────────┼──────────┼──────────┘
+            │          │
+    ┌───────▼───┐  ┌───▼────────┐
+    │ Firestore │  │  Cloud GCS  │
+    │ Case DB   │  │  Manuals   │
+    └───────────┘  └────────────┘</div>
+      </div>
+      <div class="col" style="gap:14px;">
+        <div class="card">
+          <div class="card-title">Key Engineering Decisions</div>
+          <ul class="styled" style="gap:8px;">
+            <li><strong>Single WebSocket:</strong> Binary PCM audio + JSON frames share one connection — critical for weak mobile networks</li>
+            <li><strong>AudioWorklet:</strong> Zero-dropout audio capture (vs. deprecated ScriptProcessorNode)</li>
+            <li><strong>Stateless Cloud Run:</strong> Horizontally scalable, pay-per-use, scales to zero</li>
+            <li><strong>In-memory cosine similarity RAG:</strong> Sub-1ms retrieval, no vector DB needed at MVP scale</li>
+          </ul>
+        </div>
+        <div class="card" style="border-color:rgba(34,197,94,.3);">
+          <div class="card-title" style="color:var(--green);">Cosine Similarity (RAG)</div>
+          <p style="font-size:.82rem;">Query embedding <strong>Q</strong> vs. chunk embedding <strong>C</strong> computed in NumPy:</p>
+          <p style="font-size:.9rem; color:var(--cyan); font-family:monospace; margin-top:8px; text-align:center;">
+            similarity = (Q &middot; C) / (||Q|| &times; ||C||)
+          </p>
+          <p style="font-size:.78rem; margin-top:6px;">768-dimensional vectors &rarr; &lt;1ms per lookup. No shared state between instances.</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">5 / 11</div>
+  </div>
+
+  <!-- ══ SLIDE 6 — LIVE DEMO ══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-label">Live Demo</div>
+    <h2>See It in <span class="accent">Action</span></h2>
+    <div class="cols-2" style="flex:1; align-items:stretch;">
+      <div class="col" style="gap:12px;">
+        <div class="card" style="border-color:rgba(59,130,246,.4);">
+          <div class="card-title">Demo Flow (4 minutes)</div>
+          <ul class="styled">
+            <li><strong>Scene 1:</strong> Select Telecom &rarr; ZTE-MF687</li>
+            <li><strong>Scene 2:</strong> Point camera at router &mdash; solid red LED. AI diagnoses &amp; cites manual section.</li>
+            <li><strong>Scene 3:</strong> Interrupt mid-answer: <em>"Wait &mdash; what if the SIM is faulty?"</em> &mdash; AI stops cold.</li>
+            <li><strong>Scene 4:</strong> Case history surfaces similar past repairs from Firestore.</li>
+            <li><strong>Scene 5:</strong> Step-by-step guidance &mdash; one action, wait for confirmation.</li>
+            <li><strong>Scene 6:</strong> Resolve &rarr; case auto-saved to team knowledge base.</li>
+          </ul>
+        </div>
+        <div class="card" style="border-color:rgba(245,158,11,.3); background:rgba(245,158,11,.05);">
+          <div class="card-title" style="color:var(--amber);">Watch For</div>
+          <p style="font-size:.85rem;">The citation card appearing <strong>before</strong> any repair advice is given &mdash; that constraint eliminates hallucinations. The AI cannot speak a repair step it hasn't grounded in the manual first.</p>
+        </div>
+      </div>
+      <div class="col" style="justify-content:center; align-items:center;">
+        <div style="background:var(--bg2); border:2px dashed var(--border); border-radius:16px; padding:40px; text-align:center; width:100%;">
+          <div style="font-size:4rem; margin-bottom:16px;">📱</div>
+          <p style="color:var(--cyan); font-weight:700; font-size:1.1rem; margin-bottom:8px;">LIVE DEMO</p>
+          <p style="color:var(--muted); font-size:.85rem;">Running locally on<br>http://localhost:5174</p>
+          <div style="margin-top:20px; background:var(--bg3); border-radius:8px; padding:12px; font-family:monospace; font-size:.75rem; color:var(--green);">
+            Backend: ✓ healthy (port 8000)<br>
+            ZTE-MF687 manual: ✓ ingested<br>
+            Gemini Live: ✓ connected
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">6 / 11</div>
+  </div>
+
+  <!-- ══ SLIDE 7 — MARKET ══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-label">Market Opportunity</div>
+    <h2>A <span class="accent">$6B &rarr; $30B</span> Market, Chronically Underserved by AI</h2>
+    <div class="cols-2" style="flex:1; align-items:stretch;">
+      <div class="col" style="gap:14px;">
+        <div class="card" style="border-color:rgba(59,130,246,.4);">
+          <div class="card-title">TAM / SAM / SOM</div>
+          <table style="margin-top:4px;">
+            <tr><th>Market</th><th>Size</th><th>CAGR</th></tr>
+            <tr>
+              <td>TAM &mdash; Global FSM</td>
+              <td><strong style="color:var(--cyan);">$6.0B</strong> &rarr; $29.9B</td>
+              <td>17.4%</td>
+            </tr>
+            <tr>
+              <td>SAM &mdash; AI-assisted tools</td>
+              <td><strong style="color:var(--blue);">~$1.8B</strong></td>
+              <td>~28%</td>
+            </tr>
+            <tr>
+              <td>SOM &mdash; Yr 1–3 target</td>
+              <td><strong style="color:var(--green);">~$180M</strong></td>
+              <td>&mdash;</td>
+            </tr>
+          </table>
+          <p style="font-size:.72rem; margin-top:8px; color:var(--muted);">Source: MarketsandMarkets Field Service Management Report 2024</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Why Now</div>
+          <ul class="styled" style="gap:7px;">
+            <li><strong>2.4M skilled trades jobs unfilled</strong> in the US by 2028 &mdash; companies can't hire out of this</li>
+            <li><strong>94% smartphone penetration</strong> in field workforces &mdash; the device is already there</li>
+            <li><strong>Gemini Live API (2025)</strong> makes real-time multimodal economically viable for the first time</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col" style="gap:14px;">
+        <div class="card-title">Target Verticals (Highest Fault Frequency)</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="card" style="text-align:center; padding:14px;">
+            <div style="font-size:2rem; margin-bottom:6px;">☀️</div>
+            <div style="font-weight:700; font-size:.85rem;">Solar / Energy</div>
+            <div style="font-size:.75rem; color:var(--muted);">Inverter faults, string issues</div>
+          </div>
+          <div class="card" style="text-align:center; padding:14px;">
+            <div style="font-size:2rem; margin-bottom:6px;">📡</div>
+            <div style="font-weight:700; font-size:.85rem;">Telecom</div>
+            <div style="font-size:.75rem; color:var(--muted);">Routers, base stations, CPE</div>
+          </div>
+          <div class="card" style="text-align:center; padding:14px;">
+            <div style="font-size:2rem; margin-bottom:6px;">❄️</div>
+            <div style="font-weight:700; font-size:.85rem;">HVAC</div>
+            <div style="font-size:.75rem; color:var(--muted);">Compressors, fault codes</div>
+          </div>
+          <div class="card" style="text-align:center; padding:14px;">
+            <div style="font-size:2rem; margin-bottom:6px;">🏭</div>
+            <div style="font-weight:700; font-size:.85rem;">Industrial</div>
+            <div style="font-size:.75rem; color:var(--muted);">CNC, PLCs, assembly line</div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.05);">
+          <p style="font-size:.88rem;"><strong style="color:var(--green);">Deloitte 2024:</strong> The skilled trades gap accelerates through 2030. Companies can't hire their way out. They need to make every technician as capable as their best one.</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">7 / 11</div>
+  </div>
+
+  <!-- ══ SLIDE 8 — COMPETITIVE ══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-label">Competitive Landscape</div>
+    <h2>The Only Solution That Is <span class="accent">Grounded, Conversational &amp; Mobile</span></h2>
+    <div class="cols-2" style="flex:1; align-items:stretch;">
+      <div class="col">
+        <div class="matrix-wrap" style="align-items:flex-start; padding-top:8px;">
+          <div style="width:100%;">
+            <div class="axis-label" style="color:var(--cyan);">↑ REAL-TIME VOICE + VISION</div>
+            <div class="matrix">
+              <div class="matrix-cell">
+                <div class="cell-title">ServiceMax AR</div>
+                Expensive, proprietary hardware required. $40K+/yr per enterprise.
+              </div>
+              <div class="matrix-cell highlight">
+                <div class="cell-title">★ FieldFix AI</div>
+                Mobile, manual-grounded, fully conversational. Works on any smartphone.
+              </div>
+              <div class="matrix-cell">
+                <div class="cell-title">ChatGPT / Copilot</div>
+                No grounding, hallucination risk. Unsafe for repair environments.
+              </div>
+              <div class="matrix-cell">
+                <div class="cell-title">Service Doc Tools</div>
+                Text-only, no voice, static PDFs. No institutional memory.
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr;">
+              <div class="axis-label">← GENERAL AI</div>
+              <div class="axis-label">MANUAL-GROUNDED →</div>
+            </div>
+            <div class="axis-label">↓ TEXT ONLY</div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <table>
+          <tr>
+            <th>Feature</th>
+            <th style="color:var(--cyan);">FieldFix AI</th>
+            <th>ServiceMax</th>
+            <th>Generic LLM</th>
+          </tr>
+          <tr>
+            <td>Real-time voice</td>
+            <td class="check">✓</td>
+            <td>Add-on</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Camera / vision</td>
+            <td class="check">✓</td>
+            <td>AR headset only</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Manual-grounded</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Institutional memory</td>
+            <td class="check">✓</td>
+            <td>Expensive CRM</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Any smartphone</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="check">✓</td>
+          </tr>
+          <tr>
+            <td>Annual cost / seat</td>
+            <td><strong style="color:var(--green);">$420</strong></td>
+            <td style="color:var(--red);">$40,000+</td>
+            <td>$240</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="slide-num">8 / 11</div>
+  </div>
+
+  <!-- ══ SLIDE 9 — BUSINESS MODEL ══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-label">Business Model</div>
+    <h2><span class="accent">95% Gross Margin</span> SaaS with Strong Unit Economics</h2>
+    <div class="cols-2" style="flex:1; align-items:stretch;">
+      <div class="col" style="gap:12px;">
+        <div class="rev-card">
+          <div class="rev-label">Stream 1 — Primary</div>
+          <div class="rev-num accent">$49 <span style="font-size:1rem; font-weight:400; color:var(--muted);">/seat/mo</span></div>
+          <div class="rev-desc">SaaS subscription. $29/seat for enterprise 100+ seats. Includes unlimited sessions, 50 manual uploads, case history.</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-label">Stream 2 — Services</div>
+          <div class="rev-num" style="color:var(--amber);">$500–$5K</div>
+          <div class="rev-desc">One-time manual ingestion &amp; knowledge base onboarding per equipment line. Scales with enterprise manual libraries.</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-label">Stream 3 — Enterprise / White-Label</div>
+          <div class="rev-num" style="color:var(--green);">15–20%</div>
+          <div class="rev-desc">Revenue share for manufacturers (ZTE, SMA, Carrier) embedding FieldFix into their own support portals.</div>
+        </div>
+      </div>
+      <div class="col" style="gap:14px;">
+        <div class="card" style="border-color:rgba(34,197,94,.4);">
+          <div class="card-title">Unit Economics (Year 1: 500 seats)</div>
+          <table>
+            <tr><td>ARR (500 seats × $420)</td><td style="color:var(--cyan); text-align:right;"><strong>$210,000</strong></td></tr>
+            <tr><td>Cloud Run + GCS cost</td><td style="text-align:right;">~$800/mo</td></tr>
+            <tr><td>Gross Margin</td><td style="color:var(--green); text-align:right;"><strong>~95%</strong></td></tr>
+            <tr><td>CAC (direct + demo)</td><td style="text-align:right;">~$200/seat</td></tr>
+            <tr><td>LTV (3yr, 85% retention)</td><td style="text-align:right;">~$1,260/seat</td></tr>
+            <tr><td><strong>LTV : CAC</strong></td><td style="color:var(--cyan); text-align:right;"><strong>6.3 : 1</strong></td></tr>
+          </table>
+        </div>
+        <div class="card" style="border-color:rgba(59,130,246,.3); background:rgba(59,130,246,.05);">
+          <p style="font-size:.88rem;">The marginal cost of serving an additional technician is essentially just compute. Cloud Run scales to zero when not in use. <strong>We can invest aggressively in sales without destroying margins.</strong></p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">9 / 11</div>
+  </div>
+
+  <!-- ══ SLIDE 10 — TRACTION ══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-label">Traction &amp; Roadmap</div>
+    <h2>Working Product Today. <span class="accent">3 Paying Pilots</span> in 90 Days.</h2>
+    <div class="cols-2" style="flex:1; align-items:stretch;">
+      <div class="col">
+        <div class="card">
+          <div class="card-title">What We've Built (MVP — Hackathon)</div>
+          <ul class="styled">
+            <li><span class="check">✓</span> End-to-end working product &mdash; <strong>live demo today</strong></li>
+            <li><span class="check">✓</span> 5 industries: Solar, Telecom, HVAC, Lab, Industrial</li>
+            <li><span class="check">✓</span> ZTE MF687 manual ingested &amp; live in knowledge base</li>
+            <li><span class="check">✓</span> Firestore case history seeded with real fault cases</li>
+            <li><span class="check">✓</span> Deployed on Cloud Run (production containerization)</li>
+            <li><span class="check">✓</span> Real Gemini 2.0 Flash Live API integration (not a mock)</li>
+            <li><span class="check">✓</span> AudioWorklet audio &mdash; zero deprecation warnings</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card-title" style="margin-bottom:16px;">90-Day Post-Hackathon Roadmap</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-line"><div class="tl-dot"></div><div class="tl-track"></div></div>
+            <div class="tl-content">
+              <div class="tl-month">Month 1</div>
+              <div class="tl-desc">Recruit 3 field service SMBs for paid pilot (solar + telecom focus). Target: letters of intent signed.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-line"><div class="tl-dot"></div><div class="tl-track"></div></div>
+            <div class="tl-content">
+              <div class="tl-month">Month 2</div>
+              <div class="tl-desc">Ingest 20+ real equipment manuals. Migrate RAG to Vertex AI Vector Search. iOS PWA hardening.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-line"><div class="tl-dot"></div><div class="tl-track"></div></div>
+            <div class="tl-content">
+              <div class="tl-month">Month 3</div>
+              <div class="tl-desc">ServiceNow integration for enterprise entry. <strong>Target: 50 pilot seats, $25K ARR, NPS &gt; 50.</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">10 / 11</div>
+  </div>
+
+  <!-- ══ SLIDE 11 — THANK YOU ══ -->
+  <div class="slide" id="slide-11"
+    style="background: radial-gradient(ellipse at 60% 30%, rgba(6,182,212,.18) 0%, transparent 55%),
+                        radial-gradient(ellipse at 20% 80%, rgba(59,130,246,.14) 0%, transparent 50%),
+                        var(--bg); justify-content:center; align-items:center; text-align:center;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:28px; max-width:700px;">
+      <div style="font-size:5rem; font-weight:900; background:linear-gradient(135deg, #fff 30%, var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1;">Thank You</div>
+      <p style="font-size:clamp(1rem,1.8vw,1.35rem); color:var(--muted); line-height:1.7; max-width:560px;">Let's put a <strong style="color:var(--text);">senior engineer in every technician's ear</strong> &mdash; and eliminate the $47B cost of the failed first-time fix.</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <span class="pill">$6B &rarr; $29.9B Market</span>
+        <span class="pill">95% Gross Margin</span>
+        <span class="pill">6.3x LTV:CAC</span>
+        <span class="pill">Live Demo ✓</span>
+      </div>
+      <div class="card" style="border-color:rgba(6,182,212,.4); width:100%; max-width:400px;">
+        <div class="card-title">Contact</div>
+        <p style="font-size:.92rem; line-height:2.1; color:var(--muted);">
+          📧 jknrjayalath@gmail.com<br>
+          🔗 <a href="https://www.linkedin.com/in/nirasha-jayalath/" style="color:var(--cyan);text-decoration:none;">linkedin.com/in/nirasha-jayalath</a><br>
+          💻 <a href="https://github.com/jayalath-jknr/" style="color:var(--cyan);text-decoration:none;">github.com/jayalath-jknr</a>
+        </p>
+      </div>
+    </div>
+    <div class="slide-num">11 / 11</div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- ── NAVIGATION BAR ── -->
+<div id="nav">
+  <button id="prev-btn" onclick="changeSlide(-1)" disabled>&#8592;</button>
+  <div id="dots"></div>
+  <button id="next-btn" onclick="changeSlide(1)">&#8594;</button>
+  <span id="nav-counter">1 / 11</span>
+</div>
+
+<button id="fs-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+
+<script>
+  const TOTAL = 11;
+  let current = 1;
+
+  // Build dots
+  const dotsEl = document.getElementById('dots');
+  for (let i = 1; i <= TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 1 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  }
+
+  function goTo(n) {
+    if (n < 1 || n > TOTAL) return;
+    document.querySelector('.slide.active').classList.remove('active');
+    document.querySelectorAll('.dot')[current - 1].classList.remove('active');
+    current = n;
+    document.getElementById('slide-' + n).classList.add('active');
+    document.querySelectorAll('.dot')[n - 1].classList.add('active');
+    document.getElementById('nav-counter').textContent = n + ' / ' + TOTAL;
+    document.getElementById('prev-btn').disabled = n === 1;
+    document.getElementById('next-btn').disabled = n === TOTAL;
+  }
+
+  function changeSlide(dir) { goTo(current + dir); }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault(); changeSlide(1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+      e.preventDefault(); changeSlide(-1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); goTo(1);
+    } else if (e.key === 'End') {
+      e.preventDefault(); goTo(TOTAL);
+    } else if (e.key === 'f' || e.key === 'F') {
+      toggleFullscreen();
+    }
+  });
+
+  // Touch swipe
+  let startX = 0;
+  document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 50) changeSlide(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  document.addEventListener('fullscreenchange', () => {
+    document.getElementById('fs-btn').textContent =
+      document.fullscreenElement ? '✕ Exit Fullscreen' : '⛶ Fullscreen';
+  });
+</script>
+</body>
+</html>

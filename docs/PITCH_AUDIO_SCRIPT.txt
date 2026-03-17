@@ -1,0 +1,27 @@
+# FieldFix AI — Audio Pitch Script
+# Instructions: Copy and paste the text below into Gemini.
+# PROMPT: "Read this pitch script aloud in a confident, professional, and slightly urgent tone. Do not read the section headers."
+
+---
+
+What happens when your most experienced engineer can't be on every job at once — but your least experienced technician is?
+
+Field service is a forty-seven billion dollar industry in the United States alone — and it runs on phone calls and PDFs. When the senior engineer is busy, the junior technician guesses. That guess costs money, time, and sometimes safety.
+
+This isn't an AI problem. It's an interface problem. The knowledge already exists — in manuals, in engineers' heads, in past repairs. The gap is getting that knowledge to the right person, at the right equipment, in real time.
+
+FieldFix AI is not a chatbot you type questions into. It's an active repair partner that watches, listens, and guides — like a senior engineer on a video call, but available twenty-four-seven, for every technician, on every job.
+
+Let me show you. The thing I want you to notice is the latency and the flow. The moment I interrupt it, it stops. That's the hardest part of conversational AI to get right, and it's working live right now.
+
+The entire system runs through a single WebSocket. Audio, video frames, and control signals share one connection — this is critical for field environments with unreliable mobile data. The backend is stateless on Cloud Run, horizontally scalable, and the AI can never give ungrounded advice because the system prompt architecturally prevents it.
+
+The field service management market is growing at seventeen percent annually, and the AI-assisted segment is growing even faster. But more importantly — the skill gap is accelerating. Companies can't hire their way out of this. They need to make every technician as capable as their best one.
+
+ServiceMax requires forty thousand dollars a year per enterprise seat and proprietary AR hardware. Generic LLMs will confidently tell a technician the wrong thing. FieldFix AI is the only solution that is grounded in the actual manual, conversational, and works on any smartphone the technician already has.
+
+The unit economics are strong because the marginal cost of serving an additional technician is essentially just compute — Cloud Run scales to zero when not in use. The high gross margin and strong LTV-to-CAC ratio means we can invest aggressively in sales without destroying margins.
+
+We have validated this with a working MVP across five industries. We've ingested real manuals, seeded real case history, and deployed to production. In the next ninety days, we are moving to paid pilots with three targeted field service companies.
+
+The technology is real and working. The market is huge and the timing is perfect. I'm looking for five hundred thousand dollars in pre-seed funding to turn this working product into a market leader. Let's put a senior engineer in every technician's ear, and eliminate the forty-seven billion dollar cost of the failed first-time fix. Thank you.
